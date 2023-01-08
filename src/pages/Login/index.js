@@ -1,22 +1,27 @@
-import { Card, Button, Checkbox, Form, Input } from 'antd'
+import { Card, Button, Checkbox, Form, Input, message } from 'antd'
 // import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import logo from '@/assets/logo.png'
 import './index.scss'
 import { useStore } from '@/store'
 import { useNavigate } from 'react-router-dom'
+// import { useEffect } from 'react'
 
 
 const Login = () => {
   const { loginStore } = useStore()
   const navigate = useNavigate()
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     console.log('Success:', values, values.mobile)
-    loginStore.getToken({
-      mobile: values.mobile,
-      code: values.code
-    })
-
-    navigate('/', { replace: true })
+    try {
+      await loginStore.login({
+        mobile: values.mobile,
+        code: values.code
+      })
+      navigate('/', { replace: true })
+      message.success('登录chenggong')
+    } catch (e) {
+      message.error(e.response?.data?.message || '登录失败')
+    }
 
   }
   return (
@@ -24,7 +29,15 @@ const Login = () => {
       <Card className="login-container">
         <img className="login-logo" src={logo} alt="" />
         {/* 登录表单 */}
-        <Form onFinish={onFinish} validateTrigger={['onBlur', 'onChange']}>
+        <Form
+          onFinish={onFinish}
+          validateTrigger={['onBlur', 'onChange']}
+          initialValues={{
+            mobile: '13811111111',
+            code: '246810',
+            remember: true
+          }}
+        >
           <Form.Item
             name="mobile"
             rules={[
